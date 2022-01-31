@@ -8,3 +8,9 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.4" }
 tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version="0.3", features = ["env-filter"] }
+http = "0.2"
+serde = { version = "1.0.136", features = ["derive"] }
+toml = "0.5"
+lazy_static = "1.4"

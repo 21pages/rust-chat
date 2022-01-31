@@ -1,20 +1,24 @@
-use axum::{response::Html, routing::get, Router};
+#[macro_use]
+extern crate lazy_static;
+
 use std::net::SocketAddr;
+use tracing::info;
+
+mod config;
+mod router;
+mod utils;
+
+lazy_static! {
+    pub static ref CONFIG: config::config::TomlConfig = config::config::TomlConfig::init().unwrap();
+}
 
 #[tokio::main]
 async fn main() {
-    // build our application with a route
-    let app = Router::new().route("/", get(handler));
-
-    // run it
+    utils::log::init();
     let addr = SocketAddr::from(([127, 0, 0, 1], 8888));
-    println!("listening on {}", addr);
+    info!("listening on {}", addr);
     axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+        .serve(router::router::new().into_make_service())
         .await
         .unwrap();
-}
-
-async fn handler() -> Html<&'static str> {
-    Html("<h1>Hello, World!</h1>")
 }
