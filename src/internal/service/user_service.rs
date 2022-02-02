@@ -1,13 +1,11 @@
 use crate::internal::model::user::User;
+use anyhow::Result;
 use serde::Deserialize;
 use sqlx::{self, MySqlPool};
 use std::sync::Arc;
 use tracing::trace;
 
-pub async fn login(
-    user: &mut User,
-    pool: Arc<MySqlPool>,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn login(user: &mut User, pool: Arc<MySqlPool>) -> Result<()> {
     *user = sqlx::query_as::<_, User>("select * from users where username=? and password=?")
         .bind(&user.username)
         .bind(&user.password)
@@ -50,7 +48,7 @@ struct FriendUserInfo {
     pub avatar: String,
 }
 
-pub async fn get_user_list(uuid: String, pool: Arc<MySqlPool>) -> Result<Vec<User>, sqlx::Error> {
+pub async fn get_user_list(uuid: String, pool: Arc<MySqlPool>) -> Result<Vec<User>> {
     let id: MyInt32 = sqlx::query_as::<_, MyInt32>("select id from users where uuid=?")
         .bind(uuid)
         .fetch_one(&*pool)
