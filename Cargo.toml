@@ -17,5 +17,5 @@ serde_json = "1"
 lazy_static = "1.4"
 chrono = "0.4"
 tower-http = { version = "0.2", features = ["full"] }
-sqlx = { version = "0.5", features = [ "runtime-tokio-rustls", "mysql",  "chrono", "macros"] }
+sqlx = { version = "0.5", features = [ "runtime-tokio-rustls", "mysql",  "chrono", "macros", "offline" ] }
 dotenv = "0.15"
