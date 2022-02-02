@@ -21,7 +21,10 @@ pub async fn new() -> Router {
     let state = AppState::new().await.unwrap();
 
     let app = Router::new()
-        .route("/user", put(handler).get(handler))
+        .route(
+            "/user",
+            put(handler).get(v1::user_controller::get_user_list),
+        )
         .route("/user/:uuid", get(v1::user_controller::get_user_details))
         .route("/user/name", get(handler))
         .route("/user/register", post(handler))

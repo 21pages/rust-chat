@@ -1,4 +1,5 @@
 use crate::internal::model::user::User;
+use serde::Deserialize;
 use sqlx::{self, MySqlPool};
 use std::sync::Arc;
 use tracing::trace;
@@ -16,34 +17,6 @@ pub async fn login(
     Ok(())
 }
 
-// #[derive(Debug, Serialize, sqlx::FromRow)]
-// #[serde(rename_all = "camelCase")]
-// pub struct UserDetails {
-//     pub uuid: String,
-//     pub username: String,
-//     pub nickname: String,
-//     pub avatar: String,
-// }
-
-// pub async fn get_user_details(
-//     uuid: String,
-//     pool: Arc<MySqlPool>,
-// ) -> Result<User, Box<dyn std::error::Error>> {
-//     let details = sqlx::query_as::<_, UserDetails>(
-//         "select uuid, username, nickname, avatar from users where uuid=?",
-//     )
-//     .bind(uuid)
-//     .fetch_one(&*pool)
-//     .await?;
-//     let mut user = User::default();
-//     user.uuid = details.uuid;
-//     user.username = details.username;
-//     user.nickname = details.nickname;
-//     user.avatar = details.avatar;
-//     trace!("{:?}", user);
-//     Ok(user)
-// }
-
 pub async fn get_user_details(
     uuid: String,
     pool: Arc<MySqlPool>,
@@ -59,4 +32,41 @@ pub async fn get_user_details(
     user.avatar = user_all_info.avatar;
     trace!("{:?}", user);
     Ok(user)
+}
+
+#[derive(sqlx::Type, sqlx::FromRow)]
+#[sqlx(transparent)]
+struct MyInt32(i32);
+
+#[derive(sqlx::Type, sqlx::FromRow)]
+#[sqlx(transparent)]
+struct MyVecUser(Vec<User>);
+
+#[derive(Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+struct FriendUserInfo {
+    pub uuid: String,
+    pub username: String,
+    pub avatar: String,
+}
+
+pub async fn get_user_list(uuid: String, pool: Arc<MySqlPool>) -> Result<Vec<User>, sqlx::Error> {
+    let id: MyInt32 = sqlx::query_as::<_, MyInt32>("select id from users where uuid=?")
+        .bind(uuid)
+        .fetch_one(&*pool)
+        .await?;
+    let infos :Vec<FriendUserInfo> = sqlx::query_as("SELECT u.username, u.uuid, u.avatar FROM user_friends AS uf JOIN users AS u ON uf.friend_id = u.id WHERE uf.user_id = ?")
+    .bind(id.0)
+    .fetch_all(&*pool)
+    .await?;
+    let mut users = vec![];
+    for info in infos.into_iter() {
+        let mut user = User::default();
+        user.username = info.username;
+        user.uuid = info.uuid;
+        user.avatar = info.avatar;
+        users.push(user);
+    }
+    trace!("user list: {:?}", users);
+    Ok(users)
 }

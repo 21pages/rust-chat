@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use super::message;
 use crate::internal::{model::user::User, service::user_service, state::AppState};
 use axum::{
-    extract::{Extension, Path},
+    extract::{Extension, Path, Query},
     Json,
 };
 use http::StatusCode;
@@ -50,6 +52,25 @@ pub async fn get_user_details(
         (
             StatusCode::OK,
             message::ResponseMsg::failed_msg("Get user details failed".to_owned()),
+        )
+    }
+}
+
+pub async fn get_user_list(
+    Query(params): Query<HashMap<String, String>>,
+    Extension(state): Extension<AppState>,
+) -> (StatusCode, Json<Value>) {
+    let uuid = params.get("uuid").unwrap().to_string();
+    info!("get user list:{:?}", uuid);
+    if let Ok(users) = user_service::get_user_list(uuid, state.db.clone()).await {
+        (
+            StatusCode::OK,
+            message::ResponseMsg::success_msg(serde_json::to_value(users).unwrap()),
+        )
+    } else {
+        (
+            StatusCode::OK,
+            message::ResponseMsg::failed_msg("Get user list failed".to_owned()),
         )
     }
 }
