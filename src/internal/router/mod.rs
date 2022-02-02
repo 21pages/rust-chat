@@ -22,7 +22,7 @@ pub async fn new() -> Router {
 
     let app = Router::new()
         .route("/user", put(handler).get(handler))
-        .route("/user/:uuid", get(handler))
+        .route("/user/:uuid", get(v1::user_controller::get_user_details))
         .route("/user/name", get(handler))
         .route("/user/register", post(handler))
         .route("/user/login", post(v1::user_controller::login))

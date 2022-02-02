@@ -18,7 +18,7 @@ pub struct User {
     pub create_at: DateTime<Local>,
     #[serde(with = "option_date_format")]
     pub update_at: Option<DateTime<Local>>,
-    pub delete_at: u64,
+    pub delete_at: i64,
 }
 
 impl Default for User {

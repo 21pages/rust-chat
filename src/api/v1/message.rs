@@ -4,6 +4,7 @@ use axum::Json;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tracing::warn;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MessageRequest {
@@ -34,6 +35,7 @@ impl ResponseMsg {
     }
 
     pub fn failed_msg(msg: String) -> Json<Value> {
+        warn!("{}", msg);
         Json(
             serde_json::to_value(ResponseMsg {
                 code: -1,
