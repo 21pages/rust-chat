@@ -1,24 +1,10 @@
-use crate::CONFIG;
 use sqlx::{mysql::MySqlPoolOptions, MySqlPool};
+use std::env;
 use std::time::Duration;
 use tracing::info;
 
 pub async fn new() -> MySqlPool {
-    let mysql = &CONFIG.mysql;
-    let username = &mysql.user;
-    let password = &mysql.password;
-    let host = &mysql.host;
-    let port = mysql.port;
-    let name = &mysql.name;
-
-    let dsn = format!(
-        "mysql://{username}:{password}@{host}:{port}/{name}",
-        username = username,
-        password = password,
-        host = host,
-        port = port,
-        name = name,
-    );
+    let dsn = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
     info!("mysql dsn:{}", dsn);
     MySqlPoolOptions::new()
         .max_connections(100)
