@@ -1,3 +1,4 @@
+use crate::api::v1;
 use crate::internal::state::AppState;
 use axum::{
     extract::Extension,
@@ -24,7 +25,7 @@ pub async fn new() -> Router {
         .route("/user/:uuid", get(handler))
         .route("/user/name", get(handler))
         .route("/user/register", post(handler))
-        .route("/user/login", post(handler))
+        .route("/user/login", post(v1::user_controller::login))
         .route("/friend", post(handler))
         .route("/message", get(handler))
         .route("/file/:fileName", get(handler))
@@ -45,7 +46,7 @@ async fn handler(Extension(_state): Extension<AppState>, uri: Uri) -> String {
 
 fn cors() -> CorsLayer {
     CorsLayer::new()
-        // point out all allow
+        // point out all allow!!
         .allow_methods(vec![
             Method::GET,
             Method::POST,
