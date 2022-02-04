@@ -12,13 +12,16 @@ use http::{
     },
     Method, Uri,
 };
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tower_http::{
     cors::{any, CorsLayer},
     trace::TraceLayer,
 };
 
 pub async fn new() -> Router {
-    let state = AppState::new().await.unwrap();
+    //mutex for mutable, tokio::sync::Mutex for async
+    let state = Arc::new(Mutex::new(AppState::new().await.unwrap()));
 
     let app = Router::new()
         .route(
@@ -36,14 +39,14 @@ pub async fn new() -> Router {
         .route("/group/:uuid", get(handler).post(handler))
         .route("/group/join/:userUuid/:groupUuid", post(handler))
         .route("/group/user/:uuid", get(handler))
-        .route("/socket.io", get(handler))
+        .route("/socket.io", get(v1::ws_controller::ws_handler))
         .layer(TraceLayer::new_for_http())
         .layer(AddExtensionLayer::new(state))
         .layer(cors());
     app
 }
 
-async fn handler(Extension(_state): Extension<AppState>, uri: Uri) -> String {
+async fn handler(Extension(_state): Extension<Arc<AppState>>, uri: Uri) -> String {
     format!("Hi from {:?}", uri)
 }
 

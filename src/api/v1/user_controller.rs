@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use super::message;
 use crate::internal::{model::user::User, service::user_service, state::AppState};
@@ -9,6 +9,7 @@ use axum::{
 use http::StatusCode;
 use serde::Deserialize;
 use serde_json::Value;
+use tokio::sync::Mutex;
 use tracing::info;
 
 #[derive(Debug, Deserialize)]
@@ -19,13 +20,13 @@ pub struct LoginUser {
 
 pub async fn login(
     Json(login_user): Json<LoginUser>,
-    Extension(state): Extension<AppState>,
+    Extension(state): Extension<Arc<Mutex<AppState>>>,
 ) -> (StatusCode, Json<Value>) {
     info!("user login:{:?}", login_user);
     let mut user = User::default();
     user.username = login_user.username;
     user.password = login_user.password;
-    if let Ok(_) = user_service::login(&mut user, state.db.clone()).await {
+    if let Ok(_) = user_service::login(&mut user, &state.clone().lock().await.db).await {
         (
             StatusCode::OK,
             message::ResponseMsg::success_msg(user.to_json_value()),
@@ -40,10 +41,10 @@ pub async fn login(
 
 pub async fn get_user_details(
     Path(uuid): Path<String>,
-    Extension(state): Extension<AppState>,
+    Extension(state): Extension<Arc<Mutex<AppState>>>,
 ) -> (StatusCode, Json<Value>) {
     info!("get user details:{:?}", uuid);
-    if let Ok(user) = user_service::get_user_details(uuid, state.db.clone()).await {
+    if let Ok(user) = user_service::get_user_details(uuid, &state.clone().lock().await.db).await {
         (
             StatusCode::OK,
             message::ResponseMsg::success_msg(user.to_json_value()),
@@ -58,11 +59,11 @@ pub async fn get_user_details(
 
 pub async fn get_user_list(
     Query(params): Query<HashMap<String, String>>,
-    Extension(state): Extension<AppState>,
+    Extension(state): Extension<Arc<Mutex<AppState>>>,
 ) -> (StatusCode, Json<Value>) {
     let uuid = params.get("uuid").unwrap().to_string();
     info!("get user list:{:?}", uuid);
-    if let Ok(users) = user_service::get_user_list(uuid, state.db.clone()).await {
+    if let Ok(users) = user_service::get_user_list(uuid, &state.clone().lock().await.db).await {
         (
             StatusCode::OK,
             message::ResponseMsg::success_msg(serde_json::to_value(users).unwrap()),

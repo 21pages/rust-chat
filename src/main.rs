@@ -10,6 +10,8 @@ use tracing::info;
 mod api;
 mod common;
 mod internal;
+mod protos;
+mod server;
 
 #[tokio::main]
 async fn main() {

@@ -1,15 +1,17 @@
-use crate::internal::db;
+use crate::{internal::db, server::server::Server};
+use anyhow::Result;
 use sqlx::MySqlPool;
-use std::sync::Arc;
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct AppState {
-    pub db: Arc<MySqlPool>,
+    pub db: MySqlPool,
+    pub server: Server,
 }
 
 impl AppState {
-    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new() -> Result<Self> {
         let db = db::new().await;
-        Ok(AppState { db: Arc::new(db) })
+        let server = Server::new();
+        Ok(AppState { db, server })
     }
 }
