@@ -19,7 +19,7 @@ chrono = "0.4"
 hyper = { version = "0.14", features = ["full"] }
 tower-http = { version = "0.2", features = ["full"] }
 futures = "0.3"
-sqlx = { version = "0.5", features = [ "runtime-tokio-rustls", "mysql",  "chrono", "macros", "offline" ] }
+sqlx = { version = "0.5", features = [ "runtime-tokio-native-tls", "mysql",  "chrono", "macros", "offline" ] }
 dotenv = "0.15"
 anyhow = "1"
 bytes = "1"

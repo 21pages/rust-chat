@@ -1,0 +1,13 @@
+{
+  "db": "MySQL",
+  "c965b69a8101c4a020e6765c96ce43a6a9ffd7e9455a4b04c4b1ffdc8d08688c": {
+    "query": "\n            INSERT INTO\n            users (uuid, username, password, nickname, avatar, email, create_at, delete_at)\n            VALUES ( ?,?,?,?,?,?,?,? )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 8
+      },
+      "nullable": []
+    }
+  }
+}

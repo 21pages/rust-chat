@@ -14,3 +14,15 @@ pub async fn new() -> MySqlPool {
         .await
         .unwrap()
 }
+
+pub mod sqlx_adapter {
+    use crate::internal::model::user::User;
+
+    #[derive(sqlx::Type, sqlx::FromRow)]
+    #[sqlx(transparent)]
+    pub struct MyInt32(pub i32);
+
+    #[derive(sqlx::Type, sqlx::FromRow)]
+    #[sqlx(transparent)]
+    pub struct MyVecUser(Vec<User>);
+}

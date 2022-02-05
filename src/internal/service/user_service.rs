@@ -1,8 +1,9 @@
-use crate::internal::model::user::User;
+use crate::internal::{db::sqlx_adapter, model::user::User};
 use anyhow::Result;
 use serde::Deserialize;
 use sqlx::{self, MySqlPool};
 use tracing::trace;
+use uuid::Uuid;
 
 pub async fn login(user: &mut User, pool: &MySqlPool) -> Result<()> {
     *user = sqlx::query_as::<_, User>("select * from users where username=? and password=?")
@@ -10,7 +11,38 @@ pub async fn login(user: &mut User, pool: &MySqlPool) -> Result<()> {
         .bind(&user.password)
         .fetch_one(pool)
         .await?;
-    trace!("{:?}", user);
+    Ok(())
+}
+
+/*
+    pub id: i32,
+    pub uuid: String,
+    pub username: String,
+    pub password: String,
+    pub nickname: String,
+    pub avatar: String,
+    pub email: String,
+    #[serde(with = "my_date_format")]
+    pub create_at: DateTime<Local>,
+    #[serde(with = "option_date_format")]
+    pub update_at: Option<DateTime<Local>>,
+    pub delete_at: i64,
+*/
+
+pub async fn register(user: &mut User, pool: &MySqlPool) -> Result<()> {
+    let count: sqlx_adapter::MyInt32 =
+        sqlx::query_as("select count(*) from users where username=?")
+            .bind(&user.username)
+            .fetch_one(pool)
+            .await?;
+    trace!("{} count:{}", user.username, count.0);
+    if count.0 > 0 {
+        return Err(anyhow::anyhow!("user already exists"));
+    }
+    user.uuid = Uuid::new_v4().to_string();
+    user.create_at = chrono::offset::Local::now();
+    user.delete_at = 0;
+    user.insert(pool).await?;
     Ok(())
 }
 
@@ -27,17 +59,8 @@ pub async fn get_user_details(
     user.username = user_all_info.username;
     user.nickname = user_all_info.nickname;
     user.avatar = user_all_info.avatar;
-    trace!("{:?}", user);
     Ok(user)
 }
-
-#[derive(sqlx::Type, sqlx::FromRow)]
-#[sqlx(transparent)]
-struct MyInt32(i32);
-
-#[derive(sqlx::Type, sqlx::FromRow)]
-#[sqlx(transparent)]
-struct MyVecUser(Vec<User>);
 
 #[derive(Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -48,7 +71,7 @@ struct FriendUserInfo {
 }
 
 pub async fn get_user_list(uuid: String, pool: &MySqlPool) -> Result<Vec<User>> {
-    let id: MyInt32 = sqlx::query_as::<_, MyInt32>("select id from users where uuid=?")
+    let id: sqlx_adapter::MyInt32 = sqlx::query_as("select id from users where uuid=?")
         .bind(uuid)
         .fetch_one(pool)
         .await?;

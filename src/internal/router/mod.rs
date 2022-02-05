@@ -30,7 +30,7 @@ pub async fn new() -> Router {
         )
         .route("/user/:uuid", get(v1::user_controller::get_user_details))
         .route("/user/name", get(handler))
-        .route("/user/register", post(handler))
+        .route("/user/register", post(v1::user_controller::register))
         .route("/user/login", post(v1::user_controller::login))
         .route("/friend", post(handler))
         .route("/message", get(handler))
