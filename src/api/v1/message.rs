@@ -2,10 +2,10 @@ use crate::common::date_format::my_date_format;
 use crate::internal::model;
 use axum::Json;
 use chrono::{DateTime, Local};
+use http::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::warn;
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MessageRequest {
     #[serde(rename = "messageType")]
@@ -23,26 +23,32 @@ pub struct ResponseMsg {
 }
 
 impl ResponseMsg {
-    pub fn success_msg(data: Value) -> Json<Value> {
-        Json(
-            serde_json::to_value(ResponseMsg {
-                code: 0,
-                msg: "SUCCESS".to_owned(),
-                data: Some(data),
-            })
-            .unwrap(),
+    pub fn success_msg(data: Value) -> (StatusCode, Json<Value>) {
+        (
+            StatusCode::OK,
+            Json(
+                serde_json::to_value(ResponseMsg {
+                    code: 0,
+                    msg: "SUCCESS".to_owned(),
+                    data: Some(data),
+                })
+                .unwrap(),
+            ),
         )
     }
 
-    pub fn failed_msg(msg: String) -> Json<Value> {
+    pub fn failed_msg(msg: String) -> (StatusCode, Json<Value>) {
         warn!("{}", msg);
-        Json(
-            serde_json::to_value(ResponseMsg {
-                code: -1,
-                msg,
-                data: None,
-            })
-            .unwrap(),
+        (
+            StatusCode::OK,
+            Json(
+                serde_json::to_value(ResponseMsg {
+                    code: -1,
+                    msg,
+                    data: None,
+                })
+                .unwrap(),
+            ),
         )
     }
 }

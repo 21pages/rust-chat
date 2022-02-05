@@ -27,15 +27,9 @@ pub async fn login(
     user.username = login_user.username;
     user.password = login_user.password;
     if let Ok(_) = user_service::login(&mut user, &state.clone().lock().await.db).await {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::success_msg(user.to_json_value()),
-        )
+        message::ResponseMsg::success_msg(user.to_json_value())
     } else {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::failed_msg("Login failed".to_owned()),
-        )
+        message::ResponseMsg::failed_msg("Login failed".to_owned())
     }
 }
 
@@ -45,15 +39,9 @@ pub async fn get_user_details(
 ) -> (StatusCode, Json<Value>) {
     info!("get user details:{:?}", uuid);
     if let Ok(user) = user_service::get_user_details(uuid, &state.clone().lock().await.db).await {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::success_msg(user.to_json_value()),
-        )
+        message::ResponseMsg::success_msg(user.to_json_value())
     } else {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::failed_msg("Get user details failed".to_owned()),
-        )
+        message::ResponseMsg::failed_msg("Get user details failed".to_owned())
     }
 }
 
@@ -64,14 +52,8 @@ pub async fn get_user_list(
     let uuid = params.get("uuid").unwrap().to_string();
     info!("get user list:{:?}", uuid);
     if let Ok(users) = user_service::get_user_list(uuid, &state.clone().lock().await.db).await {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::success_msg(serde_json::to_value(users).unwrap()),
-        )
+        message::ResponseMsg::success_msg(serde_json::to_value(users).unwrap())
     } else {
-        (
-            StatusCode::OK,
-            message::ResponseMsg::failed_msg("Get user list failed".to_owned()),
-        )
+        message::ResponseMsg::failed_msg("Get user list failed".to_owned())
     }
 }
