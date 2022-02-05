@@ -7,19 +7,18 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::warn;
 #[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
 pub struct MessageRequest {
-    #[serde(rename = "messageType")]
-    message_type: i32,
-    uuid: String,
-    #[serde(rename = "friendUsername")]
-    friend_username: String,
+    pub MessageType: i32,
+    pub Uuid: String,
+    pub FriendUsername: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResponseMsg {
-    code: i32,
-    msg: String,
-    data: Option<Value>,
+    pub code: i32,
+    pub msg: String,
+    pub data: Option<Value>,
 }
 
 impl ResponseMsg {
@@ -56,32 +55,32 @@ impl ResponseMsg {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct GroupResponse {
-    uuid: String,
-    group_id: i32,
+    pub uuid: String,
+    pub group_id: i32,
     #[serde(with = "my_date_format")]
-    create_at: DateTime<Local>,
-    name: String,
-    notice: String,
+    pub created_at: DateTime<Local>,
+    pub name: String,
+    pub notice: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SearchResponse {
-    user: model::user::User,
-    group: model::group::Group,
+    pub user: model::user::User,
+    pub group: model::group::Group,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct MessageResponse {
-    id: i32,
-    from_user_id: i32,
-    to_user_id: i32,
-    content: String,
-    content_type: i16,
+    pub id: u64,
+    pub from_user_id: i32,
+    pub to_user_id: i32,
+    pub content: String,
+    pub content_type: i16,
     #[serde(with = "my_date_format")]
-    create_at: DateTime<Local>,
-    from_username: String,
-    to_username: String,
-    avatar: String,
-    url: String,
+    pub created_at: DateTime<Local>,
+    pub from_username: String,
+    pub to_username: String,
+    pub avatar: String,
+    pub url: String,
 }

@@ -9,10 +9,10 @@ pub struct Group {
     pub id: i32,
     pub uuid: String,
     #[serde(with = "my_date_format")]
-    pub create_at: DateTime<Local>,
+    pub created_at: DateTime<Local>,
     #[serde(with = "option_date_format")]
-    pub update_at: Option<DateTime<Local>>,
-    pub delete_at: u64,
+    pub updated_at: Option<DateTime<Local>>,
+    pub deleted_at: u64,
     pub user_id: i32,
     pub name: String,
     pub notice: String,

@@ -1,9 +1,14 @@
-use crate::common::date_format::{self, my_date_format, option_date_format};
+use crate::{
+    api::v1::infos,
+    common::date_format::{self, my_date_format, option_date_format},
+    internal::db::sqlx_adapter,
+};
 use anyhow::Result;
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{self, MySqlPool};
+use tracing::trace;
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -63,5 +68,73 @@ impl User {
         .execute(pool)
         .await?;
         Ok(())
+    }
+
+    pub async fn get_by_username(username: &str, pool: &MySqlPool) -> Result<User> {
+        let user: User = sqlx::query_as("select * from users where username=?")
+            .bind(username)
+            .fetch_one(pool)
+            .await?;
+        Ok(user)
+    }
+
+    pub async fn get_by_username_password(
+        username: &str,
+        password: &str,
+        pool: &MySqlPool,
+    ) -> Result<User> {
+        let user: User = sqlx::query_as("select * from users where username=? and password=?")
+            .bind(username)
+            .bind(password)
+            .fetch_one(pool)
+            .await?;
+        Ok(user)
+    }
+
+    pub async fn get_by_uuid(uuid: &str, pool: &MySqlPool) -> Result<User> {
+        let user: User = sqlx::query_as("select * from users where uuid=?")
+            .bind(uuid)
+            .fetch_one(pool)
+            .await?;
+        Ok(user)
+    }
+
+    pub async fn exist_by_username(username: &str, pool: &MySqlPool) -> Result<bool> {
+        let count: sqlx_adapter::MyInt32 =
+            sqlx::query_as("select count(*) from users where username=?")
+                .bind(username)
+                .fetch_one(pool)
+                .await?;
+        trace!("{} count:{}", username, count.0);
+        Ok(count.0 > 0)
+    }
+
+    #[allow(unused)]
+    pub async fn exist_by_uuid(uuid: &str, pool: &MySqlPool) -> Result<bool> {
+        let count: sqlx_adapter::MyInt32 =
+            sqlx::query_as("select count(*) from users where uuid=?")
+                .bind(uuid)
+                .fetch_one(pool)
+                .await?;
+        trace!("{} count:{}", uuid, count.0);
+        Ok(count.0 > 0)
+    }
+
+    pub async fn get_friend_user_infos(
+        &self,
+        pool: &MySqlPool,
+    ) -> Result<Vec<infos::FriendUserInfo>> {
+        let infos: Vec<infos::FriendUserInfo> = sqlx::query_as(
+            r#"
+            SELECT u.username, u.uuid, u.avatar 
+            FROM user_friends AS uf 
+            JOIN users AS u ON uf.friend_id = u.id 
+            WHERE uf.user_id = ?
+            "#,
+        )
+        .bind(&self.id)
+        .fetch_all(pool)
+        .await?;
+        Ok(infos)
     }
 }

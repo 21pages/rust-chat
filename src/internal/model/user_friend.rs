@@ -8,10 +8,10 @@ use sqlx;
 pub struct UserFriend {
     pub id: i32,
     #[serde(with = "my_date_format")]
-    pub create_at: DateTime<Local>,
+    pub created_at: DateTime<Local>,
     #[serde(with = "option_date_format")]
-    pub update_at: Option<DateTime<Local>>,
-    pub delete_at: u64,
+    pub updated_at: Option<DateTime<Local>>,
+    pub deleted_at: u64,
     pub user_id: i32,
     pub friend_id: i32,
 }
