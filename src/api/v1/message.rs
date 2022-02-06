@@ -52,7 +52,7 @@ impl ResponseMsg {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct GroupResponse {
     pub uuid: String,
@@ -71,7 +71,7 @@ pub struct SearchResponse {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
-pub struct MessageResponse {
+pub struct UserMessageResponse {
     pub id: u64,
     pub from_user_id: i32,
     pub to_user_id: i32,
@@ -83,4 +83,26 @@ pub struct MessageResponse {
     pub to_username: String,
     pub avatar: String,
     pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct GroupMessageResponse {
+    pub id: u64,
+    pub from_user_id: i32,
+    pub to_user_id: i32,
+    pub content: String,
+    pub content_type: i16,
+    #[serde(with = "my_date_format")]
+    pub created_at: DateTime<Local>,
+    pub from_username: String,
+    pub avatar: String,
+    pub url: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct FriendRequest {
+    pub uuid: String,
+    pub friendUsername: String,
 }

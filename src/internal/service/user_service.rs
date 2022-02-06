@@ -1,4 +1,10 @@
-use crate::internal::model::user::User;
+use crate::{
+    api::v1::{
+        infos::ModiyfUserInfo,
+        message::{FriendRequest, SearchResponse},
+    },
+    internal::model::{group::Group, user::User, user_friend::UserFriend},
+};
 use anyhow::Result;
 use sqlx::{self, MySqlPool};
 use tracing::trace;
@@ -46,4 +52,61 @@ pub async fn get_user_list(uuid: String, pool: &MySqlPool) -> Result<Vec<User>> 
     }
     trace!("user list: {:?}", users);
     Ok(users)
+}
+
+pub async fn get_user_or_group_by_name(name: &str, pool: &MySqlPool) -> Result<SearchResponse> {
+    let mut user = User::default();
+    match User::get_by_username(name, pool).await {
+        Ok(u) => {
+            user.uuid = u.uuid;
+            user.username = u.username;
+            user.nickname = u.nickname;
+            user.avatar = u.avatar;
+        }
+        _ => {}
+    }
+
+    let mut group = Group::default();
+    match Group::get_by_name(name, pool).await {
+        Ok(g) => {
+            group.uuid = g.uuid;
+            group.name = g.name;
+        }
+        _ => {}
+    }
+
+    Ok(SearchResponse { user, group })
+}
+
+pub async fn modify_user_info(info: ModiyfUserInfo, pool: &MySqlPool) -> Result<()> {
+    let ret = match User::get_by_username(&info.Username, pool).await {
+        Err(e) => Err(anyhow::anyhow!(
+            "user {} doesn't exists:{:?}",
+            info.Username,
+            e
+        )),
+        Ok(mut user) => {
+            user.nickname = info.Nickname;
+            user.email = info.Email;
+            user.password = info.Password;
+            user.update(pool).await?;
+            Ok(())
+        }
+    };
+    ret
+}
+
+pub async fn add_friend(request: FriendRequest, pool: &MySqlPool) -> Result<()> {
+    let query_user = User::get_by_uuid(&request.uuid, pool).await?;
+    let friend_user = User::get_by_username(&request.friendUsername, pool).await?;
+    if let Ok(_) = UserFriend::get_by_user_id_friend_id(query_user.id, friend_user.id, pool).await {
+        return Err(anyhow::anyhow!("already friend"));
+    }
+    let user_friend = UserFriend {
+        user_id: query_user.id,
+        friend_id: friend_user.id,
+        ..Default::default()
+    };
+    user_friend.insert(pool).await?;
+    Ok(())
 }

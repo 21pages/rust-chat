@@ -1,5 +1,5 @@
 use crate::{
-    api::v1::message::MessageResponse,
+    api::v1::message::{GroupMessageResponse, UserMessageResponse},
     common::date_format::{my_date_format, option_date_format},
 };
 use anyhow::Result;
@@ -32,7 +32,7 @@ impl Message {
         current: &User,
         friend: &User,
         pool: &MySqlPool,
-    ) -> Result<Vec<MessageResponse>> {
+    ) -> Result<Vec<UserMessageResponse>> {
         let msgs = sqlx::query_as(
             r#"
             SELECT m.id, m.from_user_id, m.to_user_id, m.content, m.content_type, m.url, m.created_at, u.username AS from_username, 
@@ -46,6 +46,22 @@ impl Message {
         .bind(friend.id)
         .bind(current.id)
         .bind(friend.id)
+        .fetch_all(pool)
+        .await?;
+        Ok(msgs)
+    }
+
+    pub async fn get_group_message(id: i32, pool: &MySqlPool) -> Result<Vec<GroupMessageResponse>> {
+        let msgs = sqlx::query_as(
+            r#"
+            SELECT m.id, m.from_user_id, m.to_user_id, m.content, m.content_type, 
+            m.url, m.created_at, u.username AS from_username, u.avatar 
+            FROM messages AS m 
+            LEFT JOIN users AS u 
+            ON m.from_user_id = u.id 
+            WHERE m.message_type = 2 AND m.to_user_id = ?"#,
+        )
+        .bind(id)
         .fetch_all(pool)
         .await?;
         Ok(msgs)

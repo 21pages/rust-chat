@@ -6,6 +6,7 @@ lazy_static! {
     pub static ref BROADCAST_CHANNEL_SIZE: usize = 32;
     pub static ref MPSC_CHANNEL_SIZE: usize = 32;
     pub static ref SIGNAL_CHANNEL_SIZE: usize = 4;
+    pub static ref INVALID_ID: i32 = 0;
 }
 
 pub enum Signals {

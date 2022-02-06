@@ -1,5 +1,45 @@
 {
   "db": "MySQL",
+  "241d2f50be234c8de3bfac5aa8bd6c356e8f3071cace07dbf5c217d21f04673f": {
+    "query": "\n            INSERT INTO\n            group_members (created_at, updated_at, deleted_at, user_id, group_id, nickname, mute)\n            VALUES ( ?,?,?,?,?,?,? )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 7
+      },
+      "nullable": []
+    }
+  },
+  "5b5f769b91c8c335780a5b9ec0ac9d9bff1fb965e617bc7b79bf718008ead58c": {
+    "query": "\n            UPDATE `users` SET\n            uuid = ?,\n            username = ?,\n            password = ?,\n            nickname = ?,\n            avatar = ?,\n            email = ?,\n            create_at = ?,\n            delete_at = ?\n            WHERE id = ?\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 9
+      },
+      "nullable": []
+    }
+  },
+  "764e94dc953e2047f13d223f2fcde47bddfbc11b0be889b3acafbe2e04deba52": {
+    "query": "\n            INSERT INTO\n            `user_friends` (created_at, deleted_at, updated_at, user_id, friend_id)\n            VALUES ( ?,?,?,?,? )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 5
+      },
+      "nullable": []
+    }
+  },
+  "c6e3548721cd0486d1e3e5cc2df7c4a301b28e2ece79ae92f86c71521cf8ebb6": {
+    "query": "\n            INSERT INTO\n            `groups` (uuid, created_at, deleted_at, updated_at, user_id, name, notice)\n            VALUES ( ?,?,?,?,?,?,? )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 7
+      },
+      "nullable": []
+    }
+  },
   "c965b69a8101c4a020e6765c96ce43a6a9ffd7e9455a4b04c4b1ffdc8d08688c": {
     "query": "\n            INSERT INTO\n            users (uuid, username, password, nickname, avatar, email, create_at, delete_at)\n            VALUES ( ?,?,?,?,?,?,?,? )\n            ",
     "describe": {

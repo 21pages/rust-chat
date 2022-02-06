@@ -1,4 +1,4 @@
-use crate::api::v1;
+use crate::api::v1::{group_controller, message_controller, user_controller, ws_controller};
 use crate::internal::state::AppState;
 use axum::{
     extract::Extension,
@@ -26,20 +26,29 @@ pub async fn new() -> Router {
     let app = Router::new()
         .route(
             "/user",
-            put(handler).get(v1::user_controller::get_user_list),
+            put(user_controller::modify_user_info).get(user_controller::get_user_list),
         )
-        .route("/user/:uuid", get(v1::user_controller::get_user_details))
-        .route("/user/name", get(handler))
-        .route("/user/register", post(v1::user_controller::register))
-        .route("/user/login", post(v1::user_controller::login))
-        .route("/friend", post(handler))
-        .route("/message", get(v1::message_controller::get_message))
+        .route("/user/:uuid", get(user_controller::get_user_details))
+        .route(
+            "/user/name",
+            get(user_controller::get_user_or_group_by_name),
+        )
+        .route("/user/register", post(user_controller::register))
+        .route("/user/login", post(user_controller::login))
+        .route("/friend", post(user_controller::add_friend))
+        .route("/message", get(message_controller::get_message))
         .route("/file/:fileName", get(handler))
         .route("/file", post(handler))
-        .route("/group/:uuid", get(handler).post(handler))
-        .route("/group/join/:userUuid/:groupUuid", post(handler))
-        .route("/group/user/:uuid", get(handler))
-        .route("/socket.io", get(v1::ws_controller::ws_handler))
+        .route(
+            "/group/:uuid",
+            get(group_controller::get_user_group).post(group_controller::save_group),
+        )
+        .route(
+            "/group/join/:userUuid/:groupUuid",
+            post(group_controller::join_group),
+        )
+        .route("/group/user/:uuid", get(group_controller::get_group_users))
+        .route("/socket.io", get(ws_controller::ws_handler))
         .layer(TraceLayer::new_for_http())
         .layer(AddExtensionLayer::new(state))
         .layer(cors());

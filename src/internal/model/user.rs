@@ -1,6 +1,9 @@
 use crate::{
     api::v1::infos,
-    common::date_format::{self, my_date_format, option_date_format},
+    common::{
+        constant,
+        date_format::{self, my_date_format, option_date_format},
+    },
     internal::db::sqlx_adapter,
 };
 use anyhow::Result;
@@ -30,7 +33,7 @@ pub struct User {
 impl Default for User {
     fn default() -> Self {
         Self {
-            id: Default::default(),
+            id: *constant::INVALID_ID,
             uuid: Default::default(),
             username: Default::default(),
             password: Default::default(),
@@ -64,6 +67,35 @@ impl User {
             self.email,
             self.create_at,
             self.delete_at
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn update(&self, pool: &MySqlPool) -> Result<()> {
+        sqlx::query!(
+            r#"
+            UPDATE `users` SET
+            uuid = ?,
+            username = ?,
+            password = ?,
+            nickname = ?,
+            avatar = ?,
+            email = ?,
+            create_at = ?,
+            delete_at = ?
+            WHERE id = ?
+            "#,
+            self.uuid,
+            self.username,
+            self.password,
+            self.nickname,
+            self.avatar,
+            self.email,
+            self.create_at,
+            self.delete_at,
+            self.id
         )
         .execute(pool)
         .await?;

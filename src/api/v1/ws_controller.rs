@@ -53,10 +53,7 @@ async fn handle_socket(socket: WebSocket, name: String, state: Arc<Mutex<AppStat
         uuid: uuid::Uuid::new_v4().to_string(),
     };
     let client = Arc::new(Mutex::new(client));
-    server
-        .clients
-        .entry(name.clone())
-        .insert_entry(client.clone());
+    server.clients.insert(name.clone(), client.clone());
 
     let broadcast_receiver = server.broadcast_sender.subscribe();
 
