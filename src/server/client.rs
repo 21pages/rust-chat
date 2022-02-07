@@ -150,7 +150,7 @@ pub async fn handle_binary_message(
                 // 一般消息，比如文本消息，视频文件消息等
                 //保存在from, 防止重复
                 if let Some(_client) = state.lock().await.server.clients.get(&msg.from) {
-                    server::save_message(msg.clone()).await?;
+                    server::save_message(msg.clone(), &state.lock().await.db).await?;
                 }
 
                 if msg.message_type == pb::MessageUserType::User as i32 {
@@ -160,7 +160,7 @@ pub async fn handle_binary_message(
                     }
                 } else if msg.message_type == pb::MessageUserType::Group as i32 {
                     //群组消息转发
-                    server::send_group_message(msg.clone()).await?;
+                    server::send_group_message(msg.clone(), state.clone()).await?;
                 }
             } else {
                 // 语音电话，视频电话等，仅支持单人聊天，不支持群聊
@@ -171,8 +171,9 @@ pub async fn handle_binary_message(
             }
         } else {
             //广播消息
-            if env::var("channel_type").unwrap_or(constant::RUST_CHANNEL.clone())
-                == *constant::KAFKA
+            if env::var(&*constant::ENV_KEY_MSG_TYPE)
+                .unwrap_or(constant::ENV_VAL_MSG_TYPE_CHANNEL.clone())
+                == *constant::ENV_VAL_MSG_TYPE_KAFKA
             {
                 todo!()
             } else {
