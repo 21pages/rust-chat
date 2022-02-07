@@ -1,6 +1,9 @@
 use crate::{
     api::v1::message::{GroupMessageResponse, UserMessageResponse},
-    common::date_format::{my_date_format, option_date_format},
+    common::{
+        constant,
+        date_format::{my_date_format, option_date_format},
+    },
 };
 use anyhow::Result;
 use chrono::{DateTime, Local};
@@ -21,13 +24,54 @@ pub struct Message {
     pub from_user_id: i32,
     pub to_user_id: i32,
     pub content: String,
-    pub messsage_type: i16,
+    pub message_type: i16,
     pub content_type: i16,
     pub pic: String,
     pub url: String,
 }
 
+impl Default for Message {
+    fn default() -> Self {
+        Self {
+            id: *constant::INVALID_ID,
+            created_at: chrono::offset::Local::now(),
+            updated_at: Default::default(),
+            deleted_at: Default::default(),
+            from_user_id: Default::default(),
+            to_user_id: Default::default(),
+            content: Default::default(),
+            message_type: Default::default(),
+            content_type: Default::default(),
+            pic: Default::default(),
+            url: Default::default(),
+        }
+    }
+}
+
 impl Message {
+    pub async fn insert(&self, pool: &MySqlPool) -> Result<()> {
+        sqlx::query!(
+            r#"
+            INSERT INTO
+            `messages` (created_at, deleted_at, updated_at, from_user_id, to_user_id, content, message_type, content_type, pic, url)
+            VALUES ( ?,?,?,?,?,?,?,?,?,? )
+            "#,
+            self.created_at,
+            self.deleted_at,
+            self.updated_at,
+            self.from_user_id,
+            self.to_user_id,
+            self.content,
+            self.message_type,
+            self.content_type,
+            self.pic,
+            self.url
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn get_user_message(
         current: &User,
         friend: &User,
