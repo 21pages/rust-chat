@@ -1,5 +1,3 @@
-use std::ffi::OsString;
-
 lazy_static! {
     pub static ref HEART_BEAT: String = String::from("heatbeat");
     pub static ref PONG: String = String::from("pong");

@@ -1,3 +1,4 @@
+pub(crate) mod file_controller;
 pub(crate) mod group_controller;
 pub(crate) mod infos;
 pub(crate) mod message;

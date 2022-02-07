@@ -30,6 +30,16 @@
       "nullable": []
     }
   },
+  "93c53f4f6a52b6515a7bcb6518acadff44f998186e75bfc208019ad36ec4a485": {
+    "query": "\n            INSERT INTO\n            `messages` (created_at, deleted_at, updated_at, from_user_id, to_user_id, content, message_type, content_type, pic, url)\n            VALUES ( ?,?,?,?,?,?,?,?,?,? )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 10
+      },
+      "nullable": []
+    }
+  },
   "c6e3548721cd0486d1e3e5cc2df7c4a301b28e2ece79ae92f86c71521cf8ebb6": {
     "query": "\n            INSERT INTO\n            `groups` (uuid, created_at, deleted_at, updated_at, user_id, name, notice)\n            VALUES ( ?,?,?,?,?,?,? )\n            ",
     "describe": {

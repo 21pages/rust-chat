@@ -26,10 +26,7 @@ pub async fn register(user: &mut User, pool: &MySqlPool) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_user_details(
-    uuid: String,
-    pool: &MySqlPool,
-) -> Result<User, Box<dyn std::error::Error>> {
+pub async fn get_user_details(uuid: String, pool: &MySqlPool) -> Result<User> {
     let user_all_info = User::get_by_uuid(&uuid, pool).await?;
     let mut user = User::default();
     user.uuid = user_all_info.uuid;

@@ -1,7 +1,8 @@
-use crate::api::v1::{group_controller, message_controller, user_controller, ws_controller};
+use crate::api::v1::{
+    file_controller, group_controller, message_controller, user_controller, ws_controller,
+};
 use crate::internal::state::AppState;
 use axum::{
-    extract::Extension,
     routing::{get, post, put},
     AddExtensionLayer, Router,
 };
@@ -10,7 +11,7 @@ use http::{
         ACCEPT, ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_ORIGIN, AUTHORIZATION,
         CACHE_CONTROL, CONTENT_LANGUAGE, CONTENT_LENGTH, CONTENT_TYPE, ORIGIN,
     },
-    Method, Uri,
+    Method,
 };
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -37,8 +38,8 @@ pub async fn new() -> Router {
         .route("/user/login", post(user_controller::login))
         .route("/friend", post(user_controller::add_friend))
         .route("/message", get(message_controller::get_message))
-        .route("/file/:fileName", get(handler))
-        .route("/file", post(handler))
+        .route("/file/:fileName", get(file_controller::get))
+        .route("/file", post(file_controller::upload))
         .route(
             "/group/:uuid",
             get(group_controller::get_user_group).post(group_controller::save_group),
@@ -55,10 +56,6 @@ pub async fn new() -> Router {
     app
 }
 
-async fn handler(Extension(_state): Extension<Arc<AppState>>, uri: Uri) -> String {
-    format!("Hi from {:?}", uri)
-}
-
 fn cors() -> CorsLayer {
     CorsLayer::new()
         // point out all allow!!
@@ -68,8 +65,13 @@ fn cors() -> CorsLayer {
             Method::PUT,
             Method::OPTIONS,
             Method::DELETE,
+            Method::HEAD,
+            Method::DELETE,
+            Method::CONNECT,
+            Method::PATCH,
+            Method::TRACE,
         ])
-        .allow_headers(vec![ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
+        .allow_headers(vec![ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION]) //Access-Control-Request-Headers: x-requested-with
         .allow_credentials(true)
         .allow_origin(any())
         .expose_headers(vec![
