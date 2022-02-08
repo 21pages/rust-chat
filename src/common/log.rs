@@ -1,6 +1,16 @@
+use std::env;
+use tracing::{subscriber, Level};
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
+
 pub fn init() {
-    if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "rust_chat=trace")
+    if env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "rust_chat=trace")
     }
-    tracing_subscriber::fmt::init();
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::TRACE)
+        .with_env_filter(EnvFilter::from_default_env())
+        .finish();
+
+    subscriber::set_global_default(subscriber).unwrap();
 }
