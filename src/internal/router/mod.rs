@@ -3,6 +3,7 @@ use crate::api::v1::{
 };
 use crate::internal::state::AppState;
 use axum::{
+    http::header::HeaderName,
     routing::{get, post, put},
     AddExtensionLayer, Router,
 };
@@ -71,7 +72,13 @@ fn cors() -> CorsLayer {
             Method::PATCH,
             Method::TRACE,
         ])
-        .allow_headers(vec![ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION]) //Access-Control-Request-Headers: x-requested-with
+        .allow_headers(vec![
+            ORIGIN,
+            CONTENT_TYPE,
+            ACCEPT,
+            AUTHORIZATION,
+            HeaderName::from_static("x-requested-with"),
+        ])
         .allow_credentials(true)
         .allow_origin(any())
         .expose_headers(vec![

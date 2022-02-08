@@ -93,6 +93,18 @@ pub async fn modify_user_info(info: ModiyfUserInfo, pool: &MySqlPool) -> Result<
     ret
 }
 
+pub async fn modify_user_avatar(avatar: &str, uuid: &str, pool: &MySqlPool) -> Result<()> {
+    let ret = match User::get_by_uuid(uuid, pool).await {
+        Err(e) => Err(anyhow::anyhow!("user {} doesn't exists:{:?}", uuid, e)),
+        Ok(mut user) => {
+            user.avatar = avatar.to_owned();
+            user.update(pool).await?;
+            Ok(())
+        }
+    };
+    ret
+}
+
 pub async fn add_friend(request: FriendRequest, pool: &MySqlPool) -> Result<()> {
     let query_user = User::get_by_uuid(&request.uuid, pool).await?;
     let friend_user = User::get_by_username(&request.friendUsername, pool).await?;
